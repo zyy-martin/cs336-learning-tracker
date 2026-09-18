@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stanford CS336 | Interactive Study Hub & Progress Tracker</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌲</text></svg>">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            stanford: {
+              cardinal: '#8C1515',
+              dark: '#1e1e1e',
+              hover: '#701111',
+              light: '#FDF2F2',
+              coolGrey: '#4D4F53',
+              black: '#2E2D29'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col font-sans antialiased selection:bg-rose-100 selection:text-rose-900">
+
+  <!-- Top Header / Banner -->
+  <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo & Title -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-stanford-cardinal text-white flex items-center justify-center font-bold text-xl shadow-md">
+            S
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-extrabold text-lg tracking-tight">Stanford CS336</span>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/60 text-stanford-cardinal dark:text-rose-300">Spring 2026</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Language Modeling from Scratch • Interactive Study Hub</p>
+          </div>
+        </div>
+
+        <!-- Right Header Stats & Controls -->
+        <div class="flex items-center space-x-3 sm:space-x-4">
+          <!-- Save Status Indicator -->
+          <div id="sync-status" class="flex items-center space-x-1.5 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
+            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+            <span class="font-medium hidden md:inline">Saved to progress.json</span>
+            <span class="font-medium md:hidden">Saved</span>
+          </div>
+
+          <!-- Quick Timer Widget in Header -->
+          <button onclick="switchTab('timer')" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-medium transition">
+            <i data-lucide="timer" class="w-4 h-4 text-stanford-cardinal dark:text-rose-400"></i>
+            <span id="header-timer-display" class="font-mono">02:00:00</span>
+          </button>
+
+          <!-- External Course Link -->
+          <a href="https://cs336.stanford.edu/" target="_blank" rel="noopener noreferrer" title="Official CS336 Site" class="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+          </a>
+
+          <!-- GitHub Repo Link -->
+          <a href="https://github.com/zyy-martin" id="header-github-link" target="_blank" rel="noopener noreferrer" title="GitHub Account" class="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            <i data-lucide="github" class="w-4 h-4"></i>
+          </a>
+
+          <!-- Theme Toggle -->
+          <button id="theme-toggle" class="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+            <i data-lucide="sun" class="w-4 h-4 hidden dark:inline"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="flex space-x-1 sm:space-x-4 overflow-x-auto py-2 no-scrollbar" aria-label="Tabs">
+          <button onclick="switchTab('schedule')" class="tab-btn active flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition" data-tab="schedule">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            <span>Weekly Roadmap (21 Wk)</span>
+          </button>
+          <button onclick="switchTab('lectures')" class="tab-btn flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition" data-tab="lectures">
+            <i data-lucide="video" class="w-4 h-4"></i>
+            <span>Lectures (19)</span>
+          </button>
+          <button onclick="switchTab('assignments')" class="tab-btn flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition" data-tab="assignments">
+            <i data-lucide="code-2" class="w-4 h-4"></i>
+            <span>Assignments (5)</span>
+          </button>
+          <button onclick="switchTab('timer')" class="tab-btn flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition" data-tab="timer">
+            <i data-lucide="hourglass" class="w-4 h-4"></i>
+            <span>Session Focus Timer</span>
+          </button>
+          <button onclick="switchTab('notes')" class="tab-btn flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition" data-tab="notes">
+            <i data-lucide="book-open" class="w-4 h-4"></i>
+            <span>Study Journal & Notes</span>
+          </button>
+          <button onclick="switchTab('settings')" class="tab-btn flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition" data-tab="settings">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+            <span>Settings & Sync</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Global Progress Summary Cards -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <!-- Total Progress Card -->
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/60 shadow-sm relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Overall Progress</span>
+          <span class="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-stanford-cardinal dark:text-rose-400">
+            <i data-lucide="activity" class="w-4 h-4"></i>
+          </span>
+        </div>
+        <div class="mt-2 flex items-baseline space-x-2">
+          <span id="stat-overall-percent" class="text-2xl font-extrabold text-slate-900 dark:text-white">0%</span>
+          <span class="text-xs text-slate-500 dark:text-slate-400">completed</span>
+        </div>
+        <div class="mt-3 w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+          <div id="stat-overall-bar" class="bg-stanford-cardinal h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Hours Completed Card -->
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/60 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Time Invested</span>
+          <span class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
+            <i data-lucide="clock" class="w-4 h-4"></i>
+          </span>
+        </div>
+        <div class="mt-2 flex items-baseline space-x-1">
+          <span id="stat-hours-done" class="text-2xl font-extrabold text-slate-900 dark:text-white">0.0</span>
+          <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">/ 126 hrs</span>
+        </div>
+        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Target: 6 hrs / week (3 sessions)</p>
+      </div>
+
+      <!-- Lectures Completed Card -->
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/60 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Lectures</span>
+          <span class="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+            <i data-lucide="video" class="w-4 h-4"></i>
+          </span>
+        </div>
+        <div class="mt-2 flex items-baseline space-x-1">
+          <span id="stat-lectures-done" class="text-2xl font-extrabold text-slate-900 dark:text-white">0</span>
+          <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">/ 19 done</span>
+        </div>
+        <div class="mt-3 w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+          <div id="stat-lectures-bar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Assignments Completed Card -->
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/60 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Assignments</span>
+          <span class="p-1.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400">
+            <i data-lucide="code-2" class="w-4 h-4"></i>
+          </span>
+        </div>
+        <div class="mt-2 flex items-baseline space-x-1">
+          <span id="stat-assignments-done" class="text-2xl font-extrabold text-slate-900 dark:text-white">0</span>
+          <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">/ 5 ready</span>
+        </div>
+        <div class="mt-3 w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+          <div id="stat-assignments-bar" class="bg-purple-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 1: Weekly Study Schedule -->
+    <section id="tab-schedule" class="tab-content space-y-6">
+      <!-- Roadmap Overview Header -->
+      <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-6 rounded-2xl shadow-sm border border-slate-700">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+              Personalized Plan: 6 Hours / Week
+            </span>
+            <h2 class="text-xl font-bold mt-2">21-Week Master Study Schedule</h2>
+            <p class="text-sm text-slate-300 mt-1">
+              Structured into <strong class="text-white">3 focused sessions per week</strong> (2 Weekdays + 1 Weekend, 2 hours each) to comfortably complete all 19 lectures and 5 assignments.
+            </p>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button onclick="toggleAllWeeks(true)" class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs font-semibold transition">
+              Expand All
+            </button>
+            <button onclick="toggleAllWeeks(false)" class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs font-semibold transition">
+              Collapse All
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter / Quick Navigation for Weeks -->
+      <div class="flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-sm">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
+          <span class="font-medium text-slate-700 dark:text-slate-300 text-xs">Filter:</span>
+          <button onclick="filterSchedule('all')" class="schedule-filter-btn px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white" data-filter="all">All Weeks</button>
+          <button onclick="filterSchedule('pending')" class="schedule-filter-btn px-2.5 py-1 rounded-md text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700" data-filter="pending">Pending</button>
+          <button onclick="filterSchedule('completed')" class="schedule-filter-btn px-2.5 py-1 rounded-md text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700" data-filter="completed">Completed</button>
+        </div>
+        <div id="schedule-counter" class="text-xs text-slate-500 dark:text-slate-400">
+          Showing 21 weeks
+        </div>
+      </div>
+
+      <!-- Weeks Accordion Container -->
+      <div id="schedule-container" class="space-y-4">
+        <!-- Rendered dynamically via app.js -->
+      </div>
+    </section>
+
+    <!-- TAB 2: Lectures Hub -->
+    <section id="tab-lectures" class="tab-content hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+        <div>
+          <h2 class="text-lg font-bold">Stanford CS336 Lectures (Spring 2026)</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">19 Lectures with direct links to YouTube recordings, python code traces, slides, and notes.</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="lecture-search" placeholder="Search lectures or topics..." oninput="renderLectures()" class="pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500 w-48 sm:w-64">
+          </div>
+          <a href="https://www.youtube.com/watch?v=JuoVZkPBiKk&list=PLoROMvodv4rMqXOcazWaTUHhq-yembLCV" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-sm transition">
+            <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+            <span>YouTube Playlist</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Lectures Grid -->
+      <div id="lectures-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered dynamically via app.js -->
+      </div>
+    </section>
+
+    <!-- TAB 3: Assignments Hub -->
+    <section id="tab-assignments" class="tab-content hidden space-y-6">
+      <!-- Assignment Header Banner -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300">Hands-on Coursework</span>
+              <span class="text-xs text-slate-500 dark:text-slate-400">Stanford 5-Unit Workload (~84h)</span>
+            </div>
+            <h2 class="text-xl font-bold mt-1">CS336 Coding Assignments</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-3xl">
+              "Drawing inspiration from operating systems courses that create an OS from scratch, students will be given minimal scaffolding. Implement all layers, kernels, optimizers, and data pipelines yourself."
+            </p>
+          </div>
+          <div class="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-xs text-amber-900 dark:text-amber-200">
+            <div class="font-bold flex items-center space-x-1">
+              <i data-lucide="cpu" class="w-4 h-4 text-amber-600"></i>
+              <span>GPU Compute Advice</span>
+            </div>
+            <p class="mt-1 text-slate-600 dark:text-slate-300">
+              Debug correctness on CPU first. For training & Triton kernels, use <a href="https://modal.com" target="_blank" class="font-semibold underline text-amber-700 dark:text-amber-300">Modal ($30 free monthly)</a> or RunPod.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assignments List -->
+      <div id="assignments-list" class="space-y-6">
+        <!-- Rendered dynamically via app.js -->
+      </div>
+    </section>
+
+    <!-- TAB 4: Session Focus Timer -->
+    <section id="tab-timer" class="tab-content hidden space-y-6">
+      <div class="max-w-2xl mx-auto bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm text-center">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 dark:bg-rose-950/60 text-stanford-cardinal dark:text-rose-300 border border-rose-200 dark:border-rose-900">
+          Daily Study Session
+        </span>
+        <h2 class="text-2xl font-bold mt-3">2-Hour Study Block Focus Timer</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          Designed to match your 2-hour daily learning window. Hit start and lock in!
+        </p>
+
+        <!-- Digital Timer Display -->
+        <div class="my-8">
+          <div id="timer-display" class="font-mono-timer text-6xl sm:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            02:00:00
+          </div>
+          <div id="timer-status-text" class="text-xs font-semibold uppercase tracking-widest text-slate-400 mt-2">
+            Ready to Focus
+          </div>
+        </div>
+
+        <!-- Timer Controls -->
+        <div class="flex items-center justify-center space-x-3 sm:space-x-4">
+          <button id="timer-start-btn" onclick="startTimer()" class="flex items-center space-x-2 px-6 py-3 rounded-xl bg-stanford-cardinal hover:bg-rose-800 text-white font-bold text-sm shadow-md transition transform active:scale-95">
+            <i data-lucide="play" class="w-4 h-4"></i>
+            <span>Start Session</span>
+          </button>
+          <button id="timer-pause-btn" onclick="pauseTimer()" class="hidden flex items-center space-x-2 px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow-md transition transform active:scale-95">
+            <i data-lucide="pause" class="w-4 h-4"></i>
+            <span>Pause</span>
+          </button>
+          <button onclick="resetTimer(120)" class="flex items-center space-x-1.5 px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold text-sm transition">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            <span>2h Reset</span>
+          </button>
+          <button onclick="resetTimer(60)" class="flex items-center space-x-1.5 px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold text-sm transition">
+            <span>1h</span>
+          </button>
+          <button onclick="resetTimer(25)" class="flex items-center space-x-1.5 px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold text-sm transition">
+            <span>25m</span>
+          </button>
+        </div>
+
+        <!-- Quick Session Log Form -->
+        <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700/60 text-left">
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
+            Log What You Completed In This Session
+          </label>
+          <div class="flex space-x-2">
+            <input type="text" id="session-log-input" placeholder="e.g., Watched Lecture 2 & implemented BPE merge rules..." class="flex-1 px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500">
+            <button onclick="logCurrentSession()" class="px-4 py-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold text-xs hover:opacity-90 transition">
+              Log Session
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Session Logs Table -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-bold text-base flex items-center space-x-2">
+            <i data-lucide="history" class="w-4 h-4 text-slate-400"></i>
+            <span>Session History Log</span>
+          </h3>
+          <span id="session-logs-count" class="text-xs text-slate-500 dark:text-slate-400">0 logged</span>
+        </div>
+        <div id="session-logs-list" class="space-y-2 text-sm">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: Study Journal & Notes -->
+    <section id="tab-notes" class="tab-content hidden space-y-6">
+      <div class="flex items-center justify-between bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+        <div>
+          <h2 class="text-lg font-bold">Study Journal & Implementation Notes</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">All your lecture notes and assignment takeaways stored in <code class="font-mono bg-slate-100 dark:bg-slate-700 px-1 py-0.5 rounded">progress.json</code>.</p>
+        </div>
+        <button onclick="exportAllNotesMarkdown()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-semibold hover:opacity-90 transition">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span>Export Notes (.md)</span>
+        </button>
+      </div>
+
+      <div id="notes-aggregated-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- TAB 6: Settings & Git Sync -->
+    <section id="tab-settings" class="tab-content hidden space-y-6">
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-6 max-w-3xl mx-auto">
+        <h2 class="text-xl font-bold">Settings & Data Persistence</h2>
+
+        <!-- Local State Information -->
+        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/60 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-semibold text-slate-800 dark:text-slate-200">Local State File</span>
+            <span class="text-xs font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded">Active</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Progress is automatically saved directly to <code class="font-mono text-stanford-cardinal dark:text-rose-400 font-bold">progress.json</code> in this repository via the local Python server. It also syncs to browser <code class="font-mono">localStorage</code>.
+          </p>
+        </div>
+
+        <!-- GitHub Information -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">GitHub Repository Sync</h3>
+          <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <p class="text-sm font-medium">Your GitHub Account</p>
+              <a href="https://github.com/zyy-martin" target="_blank" class="text-xs text-rose-600 dark:text-rose-400 hover:underline font-mono">https://github.com/zyy-martin</a>
+            </div>
+            <div class="text-xs text-slate-500 dark:text-slate-400">
+              Commit <code class="font-mono">progress.json</code> to git to preserve history on GitHub!
+            </div>
+          </div>
+        </div>
+
+        <!-- Export / Import State -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Data Management</h3>
+          <div class="flex flex-wrap gap-3">
+            <button onclick="downloadProgressJson()" class="flex items-center space-x-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-xs font-semibold transition">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Download Backup (progress.json)</span>
+            </button>
+            <label class="flex items-center space-x-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-xs font-semibold cursor-pointer transition">
+              <i data-lucide="upload" class="w-4 h-4"></i>
+              <span>Restore from File</span>
+              <input type="file" id="import-json-file" accept=".json" onchange="importProgressJson(event)" class="hidden">
+            </label>
+            <button onclick="confirmResetProgress()" class="flex items-center space-x-2 px-4 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-xs font-semibold transition">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+              <span>Reset Progress</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Study Pace Configuration -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Schedule Pace Setting</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+              <span class="font-semibold block text-slate-700 dark:text-slate-300">Weekly Target</span>
+              <span class="text-slate-500 dark:text-slate-400">3 sessions × 2 hours = 6 hours/week</span>
+            </div>
+            <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+              <span class="font-semibold block text-slate-700 dark:text-slate-300">Expected Finish</span>
+              <span class="text-slate-500 dark:text-slate-400">21 Weeks (~5 Months from start date)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Video Modal Player -->
+  <div id="video-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden max-w-4xl w-full shadow-2xl border border-slate-700">
+      <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+        <h3 id="video-modal-title" class="font-bold text-sm sm:text-base truncate pr-4 text-slate-900 dark:text-white">Lecture Video</h3>
+        <button onclick="closeVideoModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="relative w-full" style="padding-top: 56.25%;">
+        <iframe id="video-iframe" class="absolute inset-0 w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      <div class="p-4 flex items-center justify-between bg-slate-50 dark:bg-slate-800 text-xs">
+        <span class="text-slate-500 dark:text-slate-400">Watch full screen or open on YouTube</span>
+        <a id="video-modal-external-link" href="#" target="_blank" rel="noopener noreferrer" class="font-semibold text-rose-600 dark:text-rose-400 hover:underline flex items-center space-x-1">
+          <span>Open on YouTube</span>
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Notes Editor Modal -->
+  <div id="notes-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <span id="notes-modal-tag" class="text-xs font-semibold px-2 py-0.5 rounded bg-rose-50 text-stanford-cardinal dark:bg-rose-950 dark:text-rose-300">Notes</span>
+          <h3 id="notes-modal-title" class="font-bold text-base mt-1 text-slate-900 dark:text-white">Lecture Notes</h3>
+        </div>
+        <button onclick="closeNotesModal()" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-4 flex-1 overflow-y-auto">
+        <textarea id="notes-modal-textarea" rows="12" placeholder="Write your takeaways, code snippets, questions, or key equations here..." class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-rose-500 resize-y"></textarea>
+      </div>
+      <div class="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex justify-end space-x-3">
+        <button onclick="closeNotesModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+          Cancel
+        </button>
+        <button onclick="saveCurrentNote()" class="px-5 py-2 rounded-xl bg-stanford-cardinal hover:bg-rose-800 text-white text-xs font-bold transition">
+          Save Notes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-xl shadow-xl flex items-center space-x-2 text-xs font-semibold">
+    <i data-lucide="check" class="w-4 h-4 text-emerald-400 dark:text-emerald-600"></i>
+    <span id="toast-message">Progress saved</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="course_data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
